@@ -1,5 +1,5 @@
 #include<iostream>
-#include<queue>
+
 #include<vector>
 #include<array>
 using namespace std;
@@ -7,13 +7,13 @@ using namespace std;
 class Book
 {
 public:
-
-	//Book() = default;
-	//Book(std::string, std::string, int, std::string, int);
+	Book() = default;
 	Book(std::string name, std::string author,int year, std::string publish,  int price ) :
 		name(name), author(author), year(year), publish(publish), price(price) {}
 	int getPrice() const { return price; }
-private:
+	/*Book addRecord();*/
+//	
+//private:
 	std::string name;
 	std::string author;
 	int year=0;
@@ -22,94 +22,124 @@ private:
 };
 class Node
 {
-	friend class BST;
-	Book *data;
+	friend class BinaryTreeBook;
+	Book* data;
 	Node* left;
 	Node* right;
 public:
-	//Node(Book& data) {
-	//	this->data = data;
-	//	this->left = nullptr;
-	//	this->right = nullptr;
-	//}
-public:
 	Node() : data(data), right(nullptr), left(nullptr) {}
 	~Node() {}
-
 };
 
-class BST {
+class BinaryTreeBook 
+{
 public:
-	BST();
+	friend class Book;
+	BinaryTreeBook();
 	void insert(Book& data);
-	void insert(Node*& p, Node* newNode);
-	void preorderTraversal() const;
+	void insert(Node*& r, Node* newNode);
+	void inorderTraversal() const;
+	void showRecords( const Node* root) const;
 private:
 	Node* root;
-	void preorderTraversal(const Node* p) const;
-	};
-	BST::BST() : root(nullptr) {}
-	void BST::insert(Book& thisPacket) {
-		Node* newNode = new Node;
-		newNode->data = &thisPacket;
-		insert(root, newNode);
-	}
-	void BST::insert(Node*& p, Node* newNode)
+	void inorderTraversal(const Node* r) const;
+};
+
+
+BinaryTreeBook::BinaryTreeBook() : root(nullptr) {}
+
+void BinaryTreeBook::insert(Book& thisPacket) {
+	Node* newNode = new Node;
+	newNode->data = &thisPacket;
+	insert(root, newNode);
+}
+void BinaryTreeBook::insert(Node*& r, Node* newNode)
+{
+	if (r == nullptr)
+		r = newNode;
+	else if (r->data->getPrice() < newNode->data->getPrice())
+		insert(r->left, newNode);
+	else
+		insert(r->right, newNode);
+}
+
+void BinaryTreeBook::inorderTraversal() const {
+	if (root == nullptr)
+		cerr << "There is no tree.";
+	else
 	{
-		if (p == nullptr)
-			p = newNode;
-		else if (p->data->getPrice() < newNode->data->getPrice())
-			insert(p->left, newNode);
-		else
-			insert(p->right, newNode);
+		inorderTraversal(root);
 	}
+}
+void BinaryTreeBook::showRecords(const Node* r) const
+{
+	cout << r->data->name <<" " << r->data->author << " " << r->data->year <<" "<< r->data->publish << " " << r->data->getPrice() << "\n";
+}
+void BinaryTreeBook::inorderTraversal(const Node* r) const
+{
 
-	void BST::preorderTraversal() const {
-		if (root == nullptr)
-			cerr << "There is no tree.";
-		else
-		{
-			preorderTraversal(root);
+	if (r == nullptr)
+		cerr << "There is no tree.";
+	else
+	{
+		if (root != nullptr) {
+			inorderTraversal(r->left);
+			showRecords(r);
+			inorderTraversal(r->right);
 		}
 	}
-
-	void BST::preorderTraversal(const Node* p) const {
-		if (root == nullptr)
-			cerr << "There is no tree.";
-		else
-		{
-			if (p != nullptr) {
-				cout << p->data->getPrice() << " ";
-				preorderTraversal(p->left);
-				preorderTraversal(p->right);
-			}
-		}
 		
-	}
-	int main()
-	{
-		BST test1;
-		Book bookTest("Traceback", "Kevin", 2003, "Jills", 250);
-		Book bookTest1("Rodeo", "Mike", 2000, "Greats", 200);
-		Book bookTest2("Mystery", "Gary", 2010, "Linderson", 150);
-		Book bookTest3("Jellybeans", "Stacy", 2011, "Heroes", 170);
-		Book bookTest4("Blinds", "Aaron", 2013, "Camera", 280);
-		Book bookTest5("Ferry", "Leo", 2001, "Kingston", 210);
-		test1.insert(bookTest);
-		test1.insert(bookTest1);
-		test1.insert(bookTest2);
-		test1.insert(bookTest3);
-		test1.insert(bookTest4);
-		test1.insert(bookTest5);
-		test1.preorderTraversal();
-
-		//cout << "Enter number be searched: ";
-		//cin >> number;
-
-		//if (search(root, number)) {
-		//	cout << "Found !" << endl;
-		//	Node* successor = getInorderSuccessor(root, number);
-		//	cout << "Inorder successor of " << number << " is: " << successor->data << endl;
-		//}
-		//else cout << "Not Found !" << endl;
-	}
+}
+Book addRecord()
+{
+	BinaryTreeBook info;
+	std::string name1, author1, publish1;
+	int year1, price1;
+	cout << " Enter name:";
+	cin >> name1;
+	cout << " Enter author's name:";
+	cin >> author1;
+	cout << " Enter year of publishment:";
+	cin >> year1;
+	cout << " Enter publishing house:";
+	cin >> publish1;
+	cout << " Enter price:";
+	cin >> price1;
+	Book bookRec(name1, author1, year1, publish1, price1);
+	info.insert(bookRec);
+	return bookRec;
+}
+int main()
+{
+	BinaryTreeBook info;
+	Book rec;
+	Book bookRec("Traceback", "Kevin", 2003, "Jills", 250);
+	Book bookRec1("Rodeo", "Mike", 2000, "Greats", 200);
+	Book bookRec2("Mystery", "Gary", 2010, "Linderson", 150);
+	Book bookRec3("Jellybeans", "Stacy", 2011, "Heroes", 170);
+	Book bookRec4("Blinds", "Aaron", 2013, "Camera", 280);
+	Book bookRec5("Ferry", "Leo", 2001, "Kingston", 210);
+	info.insert(bookRec);
+	info.insert(bookRec1);
+	info.insert(bookRec2);
+	info.insert(bookRec3);
+	info.insert(bookRec4);
+	info.insert(bookRec5);
+	//std::string name1, author1, publish1;
+	//int year1, price1;
+	//cout << " Enter name:";
+	//cin >> name1;
+	//cout << " Enter author's name:";
+	//cin >> author1;
+	//cout << " Enter year of publishment:";
+	//cin >> year1;
+	//cout << " Enter publishing house:";
+	//cin >> publish1;
+	//cout << " Enter price:";
+	//cin >> price1;
+	//Book bookRecNew(name1, author1, year1, publish1, price1);
+	//info.insert(bookRecNew);
+	//info.insert(addRecord());
+	info.inorderTraversal();
+	return 0;
+}
