@@ -1,5 +1,5 @@
 #include<iostream>
-
+#include<queue>
 #include<vector>
 #include<array>
 using namespace std;
@@ -18,8 +18,9 @@ public:
 	int price=0;
 };
 
-class Node
+struct Node
 {
+private:
 	friend class BinaryTreeBook;
 	Book* data;
 	Node* left;
@@ -38,9 +39,11 @@ public:
 	void Insert(Node*& r, Node* newNode);
 	void InorderTraversal() const;
 	void ShowRecords( const Node* r) const;
-	void FindRecord(const Node* r, int key) const;
-	void DeleteRecord(const Node* r, int key) const;
-	void FindbyKey() const;
+	void FindRecord() const;
+	void DeleteRecord(const Node* r, int key)const;
+	void FindbyKey(const Node* r, int key) const;
+	void Deallocate(const Node* r)const;
+	void deletDeepest(struct Node* root, struct Node* d_node)const;
 private:
 	Node* root;
 	void InorderTraversal(const Node* r) const;
@@ -71,7 +74,7 @@ void BinaryTreeBook::ShowRecords(const Node* r) const
 {
 	cout << r->data->name <<" " << r->data->author << " " << r->data->year <<" "<< r->data->publish << " " << r->data->getPrice() << "\n";
 }
-void  BinaryTreeBook::FindRecord(const Node* r, int key) const
+void  BinaryTreeBook::FindbyKey(const Node* r, int key) const
 {
 	if (r == nullptr)
 	{
@@ -86,18 +89,68 @@ void  BinaryTreeBook::FindRecord(const Node* r, int key) const
 
 	if (r->data->getPrice() < key)
 	{
-		FindRecord(r->left, key);
+		FindbyKey(r->left, key);
 	}
 	else if (r->data->getPrice() > key)
 	{
-		FindRecord(r->right, key);
+		FindbyKey(r->right, key);
 	}
 }
+void BinaryTreeBook::Deallocate(const Node* r) const
+{
+	if (r == NULL)
+		return;
+	Deallocate(r->right);
+	Deallocate(r->left);
+
+	free(r->data);
+}
+void BinaryTreeBook::deletDeepest(struct Node* root,struct Node* r)const
+{
+	queue<Node*> q;
+	q.push(root);
+	Node* temp = r;
+	while (!q.empty())
+	{
+		temp = q.front();
+		q.pop();
+		if (temp == r)
+		{
+			temp = NULL;
+			delete(r);
+			return;
+		}
+		if (temp->right)
+		{
+			if (temp->right == r)
+			{
+				temp->right = NULL;
+				delete(r);
+				return;
+			}
+			else
+				q.push(temp->right);
+		}
+
+		if (temp->left)
+		{
+			if (temp->left == r)
+			{
+				temp->left = NULL;
+				delete(r);
+				return;
+			}
+			else
+				q.push(temp->left);
+		}
+	}
+}
+
 void  BinaryTreeBook::DeleteRecord(const Node* r, int key) const
 {
-	if (r == nullptr)
+	/*if (r == nullptr)
 	{
-		cout << "Key not found";
+		cout << "Book not found";
 		return;
 	}
 	if (r->data->getPrice() < key)
@@ -112,20 +165,45 @@ void  BinaryTreeBook::DeleteRecord(const Node* r, int key) const
 	{
 		cout << "\n Record found: ";
 		ShowRecords(r);
-		if (r->left == nullptr && r->right == nullptr)// if a leaf node
+		if (r->left == nullptr && r->right == nullptr)
 		{
-			r = NULL;
+			r == nullptr;
+			Deallocate(r);
 		}
-	}
+	}*/
+	queue<struct Node*> q;
+	q.push(root);
 
+	Node* temp = NULL;
+	Node* key_node = NULL;
+	while (!q.empty())
+	{
+		temp = q.front();
+		q.pop();
+
+		if (temp->data->getPrice() == key)
+			key_node = temp;
+
+		if (temp->left)
+			q.push(temp->left);
+
+		if (temp->right)
+			q.push(temp->right);
+	}
+	//deletDeepest(root, temp);
+	//int x = temp->data->getPrice();
+	deletDeepest(root, temp);
+	//key_node->data->getPrice() == x;
 }
-void  BinaryTreeBook::FindbyKey() const
+
+void  BinaryTreeBook::FindRecord() const
 {
 	int key;
 	std::cout << " Enter key(price): ";
 	std::cin >> key;
-	FindRecord(root, key);
-	DeleteRecord(root, 170);
+	FindbyKey(root, key);
+	std::cin >> key;
+	DeleteRecord(root, key);
 }
 
 void BinaryTreeBook::InorderTraversal() const {
@@ -169,7 +247,7 @@ int main()
 	Book bookRec("Traceback", "Kevin", 2003, "Jills", 250);
 	Book bookRec1("Rodeo", "Mike", 2000, "Greats", 200);
 	Book bookRec2("Mystery", "Gary", 2010, "Linderson", 150);
-	Book bookRec3("Jellybeans", "Stacy", 2011, "Heroes", 170);
+	Book bookRec3("Jellybeans", "Stacy", 2011, "Heroes", 380);
 	Book bookRec4("Blinds", "Aaron", 2013, "Camera", 280);
 	Book bookRec5("Ferry", "Leo", 2001, "Kingston", 210);
 	info.Insert(bookRec);
@@ -194,7 +272,7 @@ int main()
 	//info.Insert(bookRecNew);
 	//addRecord();
 	info.InorderTraversal();
-	info.FindbyKey();
+	info.FindRecord();
 	info.InorderTraversal();
 	return 0;
 }
