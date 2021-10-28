@@ -7,14 +7,14 @@ class Book
 {
 public:
 	Book() = default;
-	Book(std::string name, std::string author,int year, std::string publish,  int price ) :
+	Book(std::string name, std::string author, int year, std::string publish, int price) :
 		name(name), author(author), year(year), publish(publish), price(price) {}
 	int getPrice() const { return price; }
 	std::string name;
 	std::string author;
-	int year=0;
+	int year = 0;
 	std::string publish;
-	int price=0;
+	int price = 0;
 };
 
 struct Node
@@ -29,7 +29,7 @@ public:
 	~Node() {}
 };
 
-class BinaryTreeBook 
+class BinaryTreeBook
 {
 public:
 	friend class Book;
@@ -37,9 +37,9 @@ public:
 	void Insert(Book& data);
 	void Insert(Node*& r, Node* newNode);
 	void InorderTraversal() const;
-	void ShowRecords( const Node* r) const;
+	void ShowRecords(const Node* r) const;
 	void FindRecord() const;
-	void DeleteRecord(const Node* r, int key)const;
+	void DeleteRecord(Node*& root, int item)const;
 	void FindbyKey(const Node* r, int key) const;
 	void FindbyPublish(const Node* r, std::string publ) const;
 	void deletDeepest(struct Node* root, struct Node* d_node)const;
@@ -47,7 +47,7 @@ public:
 	void deletion(Node*& root, int item);
 	void del();
 	void search(Node*& cur, std::string item, Node*& parent);
-	Node* findMinimum(Node* cur);
+	Node* findMinimum(Node* cur) const;
 private:
 	Node* root;
 	void InorderTraversal(const Node* r) const;
@@ -76,7 +76,7 @@ void BinaryTreeBook::Insert(Node*& r, Node* newNode)
 
 void BinaryTreeBook::ShowRecords(const Node* r) const
 {
-	std::cout << r->data->name <<" " << r->data->author << " " << r->data->year <<" "<< r->data->publish << " " << r->data->getPrice() << "\n";
+	std::cout << r->data->name << " " << r->data->author << " " << r->data->year << " " << r->data->publish << " " << r->data->getPrice() << "\n";
 }
 void  BinaryTreeBook::FindbyKey(const Node* r, int key) const
 {
@@ -147,7 +147,7 @@ void  BinaryTreeBook::FindbyPublish(const Node* r, std::string publ) const
 		FindbyPublish(root, publ);
 	}
 }
-void BinaryTreeBook::deletDeepest(struct Node* root,struct Node* r)const
+void BinaryTreeBook::deletDeepest(struct Node* root, struct Node* r)const
 {
 	std::queue<Node*> q;
 	q.push(root);
@@ -187,7 +187,63 @@ void BinaryTreeBook::deletDeepest(struct Node* root,struct Node* r)const
 		}
 	}
 }
-void  BinaryTreeBook::DeleteRecord(const Node* r, int key) const
+
+void  BinaryTreeBook::DeleteTree(const Node* r) const
+{
+	Node* parent = NULL;
+	Node* cur = root;
+	if (cur->left == NULL && cur->right == NULL)
+	{
+		if (cur != root)
+		{
+			if (parent->left == cur)
+				parent->left = NULL;
+			else
+				parent->right = NULL;
+		}
+		else
+			r = NULL;
+
+		free(cur);
+	}
+	else
+	{
+		Node* child = (cur->left) ? cur->left : cur->right;
+
+		if (cur != root)
+		{
+			if (cur == parent->left)
+				parent->left = child;
+			else
+				parent->right = child;
+		}
+		else
+			r = child;
+		free(cur);
+	}
+	std::cout << "\nTree is deleted\n";
+}
+void BinaryTreeBook::InorderTraversal() const {
+	if (root == nullptr)
+		std::cerr << "There is no record";
+	else
+		InorderTraversal(root);
+}
+void BinaryTreeBook::InorderTraversal(const Node* r) const
+{
+	if (r != nullptr) {
+		InorderTraversal(r->left);
+		ShowRecords(r);
+		InorderTraversal(r->right);
+	}
+}
+Node* BinaryTreeBook::findMinimum(Node* cur) const
+{
+	while (cur->left != NULL) {
+		cur = cur->left;
+	}
+	return cur;
+}void  BinaryTreeBook::DeleteRecord(Node*& root, int item) const
 {
 	/*if (r == nullptr)
 	{
@@ -212,34 +268,12 @@ void  BinaryTreeBook::DeleteRecord(const Node* r, int key) const
 			Deallocate(r);
 		}
 	}*/
-	std::queue<struct Node*> q;
-	q.push(root);
-
-	Node* temp = NULL;
-	Node* key_node = NULL;
-	while (!q.empty())
-	{
-		temp = q.front();
-		q.pop();
-
-		if (temp->data->getPrice() == key)
-			key_node = temp;
-
-		if (temp->left)
-			q.push(temp->left);
-
-		if (temp->right)
-			q.push(temp->right);
-	}
-	//deletDeepest(root, temp);
-	//int x = temp->data->getPrice();
-	deletDeepest(root, temp);
-	//key_node->data->getPrice() == x;
-}
-void  BinaryTreeBook::DeleteTree(const Node* r) const
-{
 	Node* parent = NULL;
 	Node* cur = root;
+
+	if (cur == NULL)
+		return;
+
 	if (cur->left == NULL && cur->right == NULL)
 	{
 		if (cur != root)
@@ -250,13 +284,24 @@ void  BinaryTreeBook::DeleteTree(const Node* r) const
 				parent->right = NULL;
 		}
 		else
-			r = NULL;
+			root = NULL;
 
 		free(cur);
 	}
+	else if (cur->left && cur->right)
+	{
+		Node* succ = findMinimum(cur->right);
+
+		int val = succ->data->getPrice();
+
+		DeleteRecord(root, succ->data->getPrice());
+
+		cur->data->publish = val;
+	}
+
 	else
 	{
-		Node* child = (cur->left) ? cur->left: cur->right;
+		Node* child = (cur->left) ? cur->left : cur->right;
 
 		if (cur != root)
 		{
@@ -265,32 +310,34 @@ void  BinaryTreeBook::DeleteTree(const Node* r) const
 			else
 				parent->right = child;
 		}
+
 		else
-			r = child;
+			root = child;
 		free(cur);
 	}
-		std::cout << "\nTree is deleted\n";
-}
-void BinaryTreeBook::InorderTraversal() const {
-	if (root == nullptr)
-		std::cerr << "There is no record";
-	else
-		InorderTraversal(root);
-}
-void BinaryTreeBook::InorderTraversal(const Node* r) const
-{
-	if (r != nullptr) {
-		InorderTraversal(r->left);
-		ShowRecords(r);
-		InorderTraversal(r->right);
-	}
-}
-Node* BinaryTreeBook::findMinimum(Node* cur)
-{
-	while (cur->left != NULL) {
-		cur = cur->left;
-	}
-	return cur;
+	//std::queue<struct Node*> q;
+	//q.push(root);
+
+	//Node* temp = NULL;
+	//Node* key_node = NULL;
+	//while (!q.empty())
+	//{
+	//	temp = q.front();
+	//	q.pop();
+
+	//	if (temp->data->getPrice() == key)
+	//		key_node = temp;
+
+	//	if (temp->left)
+	//		q.push(temp->left);
+
+	//	if (temp->right)
+	//		q.push(temp->right);
+	//}
+	////deletDeepest(root, temp);
+	////int x = temp->data->getPrice();
+	//deletDeepest(root, temp);
+	////key_node->data->getPrice() == x;
 }
 void BinaryTreeBook::deletion(Node*& root, int item)
 {
@@ -316,7 +363,7 @@ void BinaryTreeBook::deletion(Node*& root, int item)
 	}
 	else if (cur->left && cur->right)
 	{
-		Node* succ = findMinimum(cur-> right);
+		Node* succ = findMinimum(cur->right);
 
 		int val = succ->data->getPrice();
 
@@ -327,7 +374,7 @@ void BinaryTreeBook::deletion(Node*& root, int item)
 
 	else
 	{
-		Node* child = (cur->left) ? cur-> left: cur->right;
+		Node* child = (cur->left) ? cur->left : cur->right;
 
 		if (cur != root)
 		{
@@ -350,15 +397,14 @@ void  BinaryTreeBook::FindRecord() const
 	//std::cin >> key;
 	//FindbyKey(root, 210);
 	//std::cin >> key;
-	DeleteRecord(root, 180);
+
 	//std::cin >> publ;
 	//FindbyPublish(root, "Jills");
-	
+
 }
 void  BinaryTreeBook::del()
-{
-	//deletion(root, 280);
-	DeleteTree(root);
+{	DeleteRecord(root, 180);
+	//DeleteTree(root);
 }
 int main()
 {
