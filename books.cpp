@@ -37,13 +37,14 @@ public:
 	void Insert(Node*& r, Node* newNode);
 	void InorderTraversal() const;
 	void ShowRecords(const Node* r) const;
-	void FindRecord() ;
+	void find() ;
 	void FindbyAuthor(const Node* r, std::string auth);
 	Node* DeleteRecord(Node* root, int key)const;
 	void FindbyKey(const Node* r, int key) const;
 	void FindbyPublish(const Node* r, std::string publ);
 	void DeleteTree(const Node* root) const;
 	void del();
+	void addRecord();
 private:
 	Node* root;
 	void InorderTraversal(const Node* r) const;
@@ -74,7 +75,52 @@ void BinaryTreeBook::ShowRecords(const Node* r) const
 {
 	std::cout << r->data->name << " " << r->data->author << " " << r->data->year << " " << r->data->publish << " " << r->data->price << "\n";
 }
-void  BinaryTreeBook::FindbyKey(const Node* r, int key) const
+
+void BinaryTreeBook::addRecord()
+{
+	std::string name1, author1, publish1;
+	int year1, price1;
+	std::cout << " Enter name:";
+	std::cin >> name1;
+	std::cout << " Enter author's name:";
+	std::cin >> author1;
+	std::cout << " Enter year of publishment:";
+	std::cin >> year1;
+	std::cout << " Enter publishing house:";
+	std::cin >> publish1;
+	std::cout << " Enter price:";
+	std::cin >> price1;
+	Book bookRec(name1, author1, year1, publish1, price1);
+	Insert(bookRec);
+}
+
+void BinaryTreeBook::DeleteTree(const Node* r) const
+{
+	if (!r) return;
+	DeleteTree(r->left);
+	DeleteTree(r->right);
+	delete r;
+	std::cout << "\nRecord is deleted";
+	return;
+
+}
+void BinaryTreeBook::InorderTraversal() const {
+	if (root == nullptr)
+		std::cerr << "There is no record";
+	else
+		InorderTraversal(root);
+}
+void BinaryTreeBook::InorderTraversal(const Node* r) const
+{
+	if (r != nullptr) {
+		InorderTraversal(r->left);
+		ShowRecords(r);
+		InorderTraversal(r->right);
+	}
+}
+
+
+void BinaryTreeBook::FindbyKey(const Node* r, int key) const
 {
 	if (r == nullptr)
 	{
@@ -97,25 +143,27 @@ void  BinaryTreeBook::FindbyKey(const Node* r, int key) const
 		FindbyKey(r->right, key);
 	}
 }
-void addRecord()
+void BinaryTreeBook::FindbyAuthor(const Node* r, std::string auth)
 {
-	BinaryTreeBook info;
-	std::string name1, author1, publish1;
-	int year1, price1;
-	std::cout << " Enter name:";
-	std::cin >> name1;
-	std::cout << " Enter author's name:";
-	std::cin >> author1;
-	std::cout << " Enter year of publishment:";
-	std::cin >> year1;
-	std::cout << " Enter publishing house:";
-	std::cin >> publish1;
-	std::cout << " Enter price:";
-	std::cin >> price1;
-	Book bookRec(name1, author1, year1, publish1, price1);
-	info.Insert(bookRec);
+	int key = 0;
+	if (r == nullptr)
+		return;
+	if (auth == r->data->author)
+	{
+		std::cout << " Record to delete is:\n";
+		ShowRecords(r);
+		key = r->data->price;
+		std::cout << "\n";
+		DeleteRecord(root, key);
+		return;
+	}
+	else
+	
+		FindbyAuthor(r->left, auth);
+		FindbyAuthor(r->right, auth);
+	
 }
-void  BinaryTreeBook::FindbyPublish(const Node* r, std::string publ)
+void BinaryTreeBook::FindbyPublish(const Node* r, std::string publ)
 {
 	int key = 0;
 	if (r == nullptr)
@@ -131,30 +179,28 @@ void  BinaryTreeBook::FindbyPublish(const Node* r, std::string publ)
 	FindbyPublish(r->left, publ);
 	FindbyPublish(r->right, publ);
 }
-
-
-void  BinaryTreeBook::DeleteTree(const Node* r) const
+void BinaryTreeBook::find()
 {
-	if (!r) return;
-	DeleteTree(r->left);
-	DeleteTree(r->right);
-	delete r;
-	std::cout << "\nRecord is deleted";
-	return;
+	int c, key;
+	std::string publ;
+	std::cout << "_______Navigation bar_______\n Find menu:\n    1 - Show record by key(price)\n    2 - Show all records from publishment\n    3 - Back to menu\n  Your choice:";
+	std::cin >> c;
+	switch (c)
+	{
+	case 1:
+		std::cout << " Enter key(price): ";
+		std::cin >> key;
+		FindbyKey(root, key);
+		break;
 
-}
-void BinaryTreeBook::InorderTraversal() const {
-	if (root == nullptr)
-		std::cerr << "There is no record";
-	else
-		InorderTraversal(root);
-}
-void BinaryTreeBook::InorderTraversal(const Node* r) const
-{
-	if (r != nullptr) {
-		InorderTraversal(r->left);
-		ShowRecords(r);
-		InorderTraversal(r->right);
+	case 2:
+		std::cout << " Enter name of publishment: ";
+		std::cin >> publ;
+		FindbyPublish(root, publ);
+		break;
+	case 3:
+		break;
+
 	}
 }
 Node* BinaryTreeBook::DeleteRecord(Node* r, int key) const
@@ -190,76 +236,54 @@ Node* BinaryTreeBook::DeleteRecord(Node* r, int key) const
 		delete r;
 		return temp;
 	}
-	else if (key > r->data->price)
+	else if (key < r->data->price)
 		r->left = DeleteRecord(r->left, key);
 	else
 		r->right = DeleteRecord(r->right, key);
 	return r;
 }
-
-void  BinaryTreeBook::FindRecord()
+void BinaryTreeBook::del()
 {
-	int key;
-	std::string publ;
-	std::cout << " Enter key(price): ";
-	//std::cin >> key;
-	FindbyKey(root, 210);
-	//std::cin >> publ;
-	FindbyPublish(root, "Jills");
-}
-
-void  BinaryTreeBook::FindbyAuthor(const Node* r, std::string auth)
-{
-	int key = 0;
-	if (r == nullptr)
-		return;
-	if (auth == r->data->author)
+	int c,key;
+	char des;
+	std::string toDelete;
+	std::cout << "_______Navigation bar_______\n Delete menu:\n    1 - Delete record by key(price)\n    2 - Delete all records by author\n    3 - Delete all records\n    4 - Back to menu \n  Your choice:";
+	std::cin >> c;
+	switch (c)
 	{
-		std::cout << " Record to delete is:\n";
-		ShowRecords(r);
-		key = r->data->price;
-		std::cout << "\n";
+	case 1:
+		std::cout << " Enter record price: ";
+		std::cin >> key;
 		DeleteRecord(root, key);
+		break;
+
+	case 2:
+		std::cout << " Enter authors name to delete: ";
+		std::cin >> toDelete;
+		FindbyAuthor(root, toDelete);
+		break;
+	case 3:
+		std::cout << " Are you sure you want to delete everything?(y/n)";
+		std::cin >> des;
+		if(des == 'y')
+			DeleteTree(root);
+		break;
+
+	default:
 		return;
 	}
-	else
-	
-		FindbyAuthor(r->left, auth);
-		FindbyAuthor(r->right, auth);
-	
-}
-void  BinaryTreeBook::del()
-{	
-	std::string toDelete;
-	std::cout << " Enter authors name to delete: ";
-	std::cin >> toDelete;
-	FindbyAuthor(root, toDelete);
-	int key;
-	std::cout << " Enter record you want to delete: ";
-	std::cin >> key;
-	DeleteRecord(root, key);
-
-	InorderTraversal();
-	//DeleteTree(root);
 }
 int main()
 {
 	BinaryTreeBook info;
-	Book rec;
 	Book bookRec("Traceback", "Kevin", 2003, "Huston", 250);
 	Book bookRec1("Rodeo", "Mike", 2000, "Greats", 200);
 	Book bookRec2("Mystery", "Leo", 2010, "Jills", 150);
-	Book bookRec3("Jellybeans", "Stacy", 2011, "Jills", 180);
-	Book bookRec4("Blinds", "Aaron", 2013, "Jills", 280);
+	Book bookRec3("Jellybeans", "Stacy", 2011, "Camera", 180);
+	Book bookRec4("Blinds", "Mike", 2013, "Jills", 280);
 	Book bookRec5("Ferry", "Leo", 2001, "Kingston", 210);
-	info.Insert(bookRec);
-	info.Insert(bookRec1);
-	info.Insert(bookRec2);
-	info.Insert(bookRec3);
-	info.Insert(bookRec4);
-	info.Insert(bookRec5);
 	std::string name1, author1, publish1;
-	int year1, price1;
+	int year1, price1, c;
 	std::cout << " Enter name:";
 	std::cin >> name1;
 	std::cout << " Enter author's name:";
@@ -271,15 +295,35 @@ int main()
 	std::cout << " Enter price:";
 	std::cin >> price1;
 	Book bookRecNew(name1, author1, year1, publish1, price1);
+	//info.addRecord();
+	info.Insert(bookRec);
+	info.Insert(bookRec1);
+	info.Insert(bookRec2);
+	info.Insert(bookRec3);
+	info.Insert(bookRec4);
+	info.Insert(bookRec5);
+
 	info.Insert(bookRecNew);
-	//addRecord();
 	info.InorderTraversal();
+	do
+	{
+		std::cout << "\n_______Navigation bar_______\n Menu:\n    1 - Show all records inorder\n    2 - Find menu\n    3 - Delete menu\n    4 - Quit\n  Your choice:";
+		std::cin >> c;
 
-	info.FindRecord();
-	
-	info.del();
-	//info.InorderTraversal();
-
-
+		switch (c)
+		{
+		case 1:
+			info.InorderTraversal();
+			break;
+		case 2:
+			info.find();
+			break;
+		case 3:
+			info.del();
+			break;
+		default:
+			break;
+		}
+	} while (c != 4);
 	return 0;
 }
