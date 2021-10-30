@@ -35,25 +35,21 @@ public:
 	BinaryTreeBook();
 	void Insert(Book& data);
 	void Insert(Node*& r, Node* newNode);
-	void InorderTraversal() const;
-	void ShowRecords(const Node* r) const;
-	void find() ;
-	void FindbyAuthor(const Node* r, std::string auth);
+	void InorderTraversal();
+	void ShowRecords(const Node* r);
+	void find();
+	void FindbyKey(  Node* r, int key)  ;
+	void FindbyPublish(  Node* r, std::string publ);
+	void DeleteTree(Node* root);
+	void DelbyAuthor(const Node* r, std::string auth);
 	Node* DeleteRecord(Node* root, int key)const;
-	void FindbyKey(const Node* r, int key) const;
-	void FindbyPublish(const Node* r, std::string publ);
-	void DeleteTree(const Node* root) const;
 	void del();
-	void addRecord();
 private:
 	Node* root;
-	void InorderTraversal(const Node* r) const;
+	void InorderTraversal(Node* r);
 };
 
-
 BinaryTreeBook::BinaryTreeBook() : root(nullptr) {}
-
-
 
 void BinaryTreeBook::Insert(Book& thisBook) {
 	Node* newNode = new Node;
@@ -64,53 +60,25 @@ void BinaryTreeBook::Insert(Node*& r, Node* newNode)
 {
 	if (r == nullptr)
 		r = newNode;
-	else if (r->data->price < newNode->data->price)
+	else if (r->data->price > newNode->data->price)
 		Insert(r->left, newNode);
 	else
 		Insert(r->right, newNode);
 }
 
 
-void BinaryTreeBook::ShowRecords(const Node* r) const
+void BinaryTreeBook::ShowRecords(const Node* r)
 {
 	std::cout << r->data->name << " " << r->data->author << " " << r->data->year << " " << r->data->publish << " " << r->data->price << "\n";
 }
 
-void BinaryTreeBook::addRecord()
-{
-	std::string name1, author1, publish1;
-	int year1, price1;
-	std::cout << " Enter name:";
-	std::cin >> name1;
-	std::cout << " Enter author's name:";
-	std::cin >> author1;
-	std::cout << " Enter year of publishment:";
-	std::cin >> year1;
-	std::cout << " Enter publishing house:";
-	std::cin >> publish1;
-	std::cout << " Enter price:";
-	std::cin >> price1;
-	Book bookRec(name1, author1, year1, publish1, price1);
-	Insert(bookRec);
-}
-
-void BinaryTreeBook::DeleteTree(const Node* r) const
-{
-	if (!r) return;
-	DeleteTree(r->left);
-	DeleteTree(r->right);
-	delete r;
-	std::cout << "\nRecord is deleted";
-	return;
-
-}
-void BinaryTreeBook::InorderTraversal() const {
+void BinaryTreeBook::InorderTraversal() {
 	if (root == nullptr)
 		std::cerr << "There is no record";
 	else
 		InorderTraversal(root);
 }
-void BinaryTreeBook::InorderTraversal(const Node* r) const
+void BinaryTreeBook::InorderTraversal(Node* r) 
 {
 	if (r != nullptr) {
 		InorderTraversal(r->left);
@@ -118,9 +86,48 @@ void BinaryTreeBook::InorderTraversal(const Node* r) const
 		InorderTraversal(r->right);
 	}
 }
+Node* BinaryTreeBook::DeleteRecord(Node* r, int key) const
+{
+	if (r == NULL)
+		return r;
+	if (key == r->data->price)
+	{
+		Node* temp;
+		if (r->right == NULL)
+			temp = r->left;
+		else {
+			Node* ptr = r->right;
+			if (r->left == NULL)
+			{
+				ptr->left = r->left;
+				temp = ptr;
+			}
+			else
+			{
+				Node* ptrmin = ptr->left;
+				while (ptrmin != NULL)
+				{
+					ptr = ptrmin;
+					ptrmin = ptr->left;
+				}
+				ptr->left = ptrmin->right;
+				ptrmin->left = r->left;
+				ptrmin->right = r->right;
+				temp = ptrmin;
+			}
+		}
 
+		delete r;
+		return temp;
+	}
+	else if (key < r->data->price)
+		r->left = DeleteRecord(r->left, key);
+	else
+		r->right = DeleteRecord(r->right, key);
+	return r;
+}
 
-void BinaryTreeBook::FindbyKey(const Node* r, int key) const
+void BinaryTreeBook::FindbyKey(  Node* r, int key)  
 {
 	if (r == nullptr)
 	{
@@ -134,16 +141,16 @@ void BinaryTreeBook::FindbyKey(const Node* r, int key) const
 		std::cout << "\n";
 	}
 
-	if (r->data->price < key)
+	if (r->data->price > key)
 	{
 		FindbyKey(r->left, key);
 	}
-	else if (r->data->price > key)
+	else if (r->data->price < key)
 	{
 		FindbyKey(r->right, key);
 	}
 }
-void BinaryTreeBook::FindbyAuthor(const Node* r, std::string auth)
+void BinaryTreeBook::DelbyAuthor( const Node* r, std::string auth)
 {
 	int key = 0;
 	if (r == nullptr)
@@ -158,12 +165,13 @@ void BinaryTreeBook::FindbyAuthor(const Node* r, std::string auth)
 		return;
 	}
 	else
-	
-		FindbyAuthor(r->left, auth);
-		FindbyAuthor(r->right, auth);
+		DelbyAuthor(r->left, auth);
+		DelbyAuthor(r->right, auth);
+
+
 	
 }
-void BinaryTreeBook::FindbyPublish(const Node* r, std::string publ)
+void BinaryTreeBook::FindbyPublish(  Node* r, std::string publ)
 {
 	int key = 0;
 	if (r == nullptr)
@@ -203,45 +211,17 @@ void BinaryTreeBook::find()
 
 	}
 }
-Node* BinaryTreeBook::DeleteRecord(Node* r, int key) const
+void BinaryTreeBook::DeleteTree(  Node* r)  
 {
-	if (r == NULL)
-		return r;
-	if (key == r->data->price)
-	{
-		Node* temp;
-		if (r->right == NULL)
-			temp = r->left;
-		else {
-			Node* ptr = r->right;
-			if (r->left == NULL)
-			{
-				ptr->left = r->left;
-				temp = ptr;
-			}
-			else
-			{
-				Node* ptrmin = ptr->left;
-				while (ptrmin->left != NULL)
-				{
-					ptr = ptrmin;
-					ptrmin = ptr->left;
-				}
-				ptr->left = ptrmin->right;
-				ptrmin->left = r->left;
-				ptrmin->right = r->right;
-				temp = ptrmin;
-			}
-		}
-		delete r;
-		return temp;
-	}
-	else if (key < r->data->price)
-		r->left = DeleteRecord(r->left, key);
-	else
-		r->right = DeleteRecord(r->right, key);
-	return r;
+	if (!r) return;
+	DeleteTree(r->left);
+	DeleteTree(r->right);
+	delete r;
+	std::cout << "\nRecord is deleted";
+	return;
+
 }
+
 void BinaryTreeBook::del()
 {
 	int c,key;
@@ -260,7 +240,7 @@ void BinaryTreeBook::del()
 	case 2:
 		std::cout << " Enter authors name to delete: ";
 		std::cin >> toDelete;
-		FindbyAuthor(root, toDelete);
+		DelbyAuthor(root, toDelete);
 		break;
 	case 3:
 		std::cout << " Are you sure you want to delete everything?(y/n)";
@@ -277,9 +257,9 @@ int main()
 {
 	BinaryTreeBook info;
 	Book bookRec("Traceback", "Kevin", 2003, "Huston", 250);
-	Book bookRec1("Rodeo", "Mike", 2000, "Greats", 200);
-	Book bookRec2("Mystery", "Leo", 2010, "Jills", 150);
-	Book bookRec3("Jellybeans", "Stacy", 2011, "Camera", 180);
+	Book bookRec1("Rodeo", "Mike", 2000, "Jills", 200);
+	Book bookRec2("Mystery", "Leo", 2010, "Great", 150);
+	Book bookRec3("Jellybeans", "Stacy", 2011, "Camera", 170);
 	Book bookRec4("Blinds", "Mike", 2013, "Jills", 280);
 	Book bookRec5("Ferry", "Leo", 2001, "Kingston", 210);
 	std::string name1, author1, publish1;
@@ -295,14 +275,13 @@ int main()
 	std::cout << " Enter price:";
 	std::cin >> price1;
 	Book bookRecNew(name1, author1, year1, publish1, price1);
-	//info.addRecord();
+
 	info.Insert(bookRec);
 	info.Insert(bookRec1);
 	info.Insert(bookRec2);
 	info.Insert(bookRec3);
 	info.Insert(bookRec4);
 	info.Insert(bookRec5);
-
 	info.Insert(bookRecNew);
 	info.InorderTraversal();
 	do
